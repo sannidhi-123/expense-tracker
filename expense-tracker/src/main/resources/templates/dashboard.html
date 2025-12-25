@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard | ExpenseTracker</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <nav class="sidebar">
+        <div class="brand">
+            <i class="fas fa-wallet"></i> ExpenseTracker
+        </div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-item active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/expenses" class="nav-item"><i class="fas fa-receipt"></i> Expenses</a>
+            <a href="/categories" class="nav-item"><i class="fas fa-tags"></i> Categories</a>
+            <a href="/budget" class="nav-item"><i class="fas fa-bullseye"></i> Budget</a>
+        </div>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </nav>
+
+    <main class="main-content">
+        <h2 style="margin-bottom: 25px;">Dashboard Overview</h2>
+
+        <div class="summary-grid">
+            <div class="summary-card" style="border-color: #10b981;">
+                <h3>Total Income</h3>
+                <p th:text="${totalIncome}" style="color: #10b981;"></p>
+                <i class="fas fa-arrow-up" style="position: absolute; right: 20px; top: 20px; color: #10b981; opacity: 0.2; font-size: 2rem;"></i>
+            </div>
+            <div class="summary-card" style="border-color: #ef4444;">
+                <h3>Total Expense</h3>
+                <p th:text="${totalExpense}" style="color: #ef4444;"></p>
+                <i class="fas fa-arrow-down" style="position: absolute; right: 20px; top: 20px; color: #ef4444; opacity: 0.2; font-size: 2rem;"></i>
+            </div>
+            <div class="summary-card" style="border-color: #4f46e5;">
+                <h3>Balance</h3>
+                <p th:text="${balance}" style="color: #4f46e5;"></p>
+                <i class="fas fa-wallet" style="position: absolute; right: 20px; top: 20px; color: #4f46e5; opacity: 0.2; font-size: 2rem;"></i>
+            </div>
+
+            <div class="summary-card" th:style="${budgetPercent > 100} ? 'border-color:#ef4444;' : 'border-color:#f59e0b;'">
+                <h3>Monthly Budget</h3>
+                <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+                    <p th:text="${budgetLimit}"></p>
+                    <small th:text="${#numbers.formatDecimal(budgetPercent,1,0)} + '%'" style="font-weight:bold;"></small>
+                </div>
+
+                <div style="background:#e2e8f0; height:6px; border-radius:10px; margin-top:10px; overflow:hidden;">
+                    <div th:style="'width:' + (${budgetPercent > 100 ? 100 : budgetPercent}) + '%; height:100%; background:' + (${budgetPercent > 100} ? '#ef4444' : '#f59e0b')"></div>
+                </div>
+                <small style="color:var(--text-muted); display:block; margin-top:5px;">
+                    Left: <span th:text="${budgetRemaining}"></span>
+                </small>
+            </div>
+        </div>
+
+        <div class="chart-grid">
+            <div class="chart-container">
+                <h3>Category-wise Expense</h3>
+                <div class="canvas-wrapper">
+                    <canvas id="categoryChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <h3>Income vs Expense</h3>
+                <div class="canvas-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="chart-container" style="grid-column: 1 / -1;">
+                <h3>Monthly Expense Trend</h3>
+                <div class="canvas-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script th:inline="javascript">
+    const totalIncome = [[${totalIncome}]];
+    const totalExpense = [[${totalExpense}]];
+    const categoryLabels = [[${categoryData.keySet()}]];
+    const categoryValues = [[${categoryData.values()}]];
+    const monthLabels = [[${monthlyData.keySet()}]];
+    const monthValues = [[${monthlyData.values()}]];
+
+    // Common options for responsiveness
+    const responsiveOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+    };
+
+    new Chart(document.getElementById('pieChart'), {
+        type: 'doughnut',
+        data: {
+            labels: ['Income', 'Expense'],
+            datasets: [{
+                data: [totalIncome, totalExpense],
+                backgroundColor: ['#10b981', '#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            ...responsiveOptions,
+            cutout: '70%',
+            plugins: { legend: { position: 'bottom' } }
+        }
+    });
+
+    new Chart(document.getElementById('categoryChart'), {
+        type: 'bar',
+        data: {
+            labels: categoryLabels,
+            datasets: [{
+                label: 'Expense',
+                data: categoryValues,
+                backgroundColor: '#6366f1',
+                borderRadius: 4
+            }]
+        },
+        options: {
+            ...responsiveOptions,
+            scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } }
+        }
+    });
+
+    new Chart(document.getElementById('lineChart'), {
+        type: 'line',
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: 'Monthly Expense',
+                data: monthValues,
+                borderColor: '#f59e0b',
+                backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                tension: 0.4,
+                fill: true,
+                pointRadius: 4
+            }]
+        },
+        options: responsiveOptions
+    });
+</script>
+</body>
+</html>

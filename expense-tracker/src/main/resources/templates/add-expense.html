@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Add Transaction | ExpenseTracker</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+<div class="app-container">
+
+    <nav class="sidebar">
+        <div class="brand"><i class="fas fa-wallet"></i> ExpenseTracker</div>
+        <div class="nav-links">
+            <a href="/dashboard" class="nav-item"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="/expenses" class="nav-item active"><i class="fas fa-receipt"></i> Expenses</a>
+            <a href="/categories" class="nav-item"><i class="fas fa-tags"></i> Categories</a>
+            <a href="/budget" class="nav-item"><i class="fas fa-bullseye"></i> Budget</a>
+        </div>
+        <form th:action="@{/logout}" method="post" class="logout-form">
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </nav>
+
+    <main class="main-content">
+        <div class="card-box" style="max-width: 600px; margin: 0 auto;">
+            <h2 style="margin-bottom: 20px; border-bottom:1px solid #e2e8f0; padding-bottom:15px;">
+                <i class="fas fa-plus-circle" style="color:var(--primary);"></i> Add Transaction
+            </h2>
+
+            <form th:action="@{/expenses/save}" th:object="${expense}" method="post">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <label>Amount</label>
+                        <input type="number" th:field="*{amount}" required placeholder="0.00" step="0.01">
+                    </div>
+                    <div>
+                        <label>Type</label>
+                        <select th:field="*{type}" id="typeSelect" required>
+                            <option value="">Select Type</option>
+                            <option value="EXPENSE">Expense</option>
+                            <option value="INCOME">Income</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="categoryBox" style="display:none;">
+                    <label>Category</label>
+                    <select th:field="*{category.id}">
+                        <option value="">Select Category</option>
+                        <option th:each="cat : ${categories}" th:value="${cat.id}" th:text="${cat.name}"></option>
+                    </select>
+                </div>
+
+                <div>
+                    <label>Description</label>
+                    <input type="text" th:field="*{description}" placeholder="e.g. Grocery shopping, Monthly Salary">
+                </div>
+
+                <div style="display:flex; gap:10px; margin-top:10px;">
+                    <button type="submit" style="flex:1;">Save Transaction</button>
+                    <a href="/expenses" style="padding:0.85rem; border:1px solid var(--border); border-radius:8px; color:var(--text-main); font-weight:500;">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </main>
+</div>
+
+<script>
+    const typeSelect = document.getElementById("typeSelect");
+    const categoryBox = document.getElementById("categoryBox");
+
+    // Run on load to handle validation errors preserving state
+    function toggleCategory() {
+        if (typeSelect.value === "EXPENSE") {
+            categoryBox.style.display = "block";
+        } else {
+            categoryBox.style.display = "none";
+        }
+    }
+
+    typeSelect.addEventListener("change", toggleCategory);
+    toggleCategory(); // Run once on init
+</script>
+</body>
+</html>
