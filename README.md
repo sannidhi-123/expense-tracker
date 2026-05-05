@@ -25,8 +25,13 @@ A simple and user-friendly web application built using HTML, CSS, and JavaScript
 ---
 
 ## 📁 Project Structure
-
-expense-tracker/ │ ├── index.html        # Main HTML file ├── style.css         # Styling ├── script.js         # JavaScript logic ├── assets/           # Images/icons (if any) └── README.md
+expense-tracker/
+│
+├── index.html        # Main HTML file
+├── style.css         # Styling
+├── script.js         # JavaScript logic
+├── assets/           # Images/icons (if any)
+└── README.md
 
 ---
 
